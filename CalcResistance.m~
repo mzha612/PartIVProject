@@ -23,11 +23,11 @@ phi_s = 1 - phi_f; % Solud fraction
 phi = phi_s/phi_f;
 chi = (K*(H^2))/(phi_f*mu_f); % [Non-dimensional] EGL permeability
 V = 10^(-3); % Flow velocity (metres per second)
-P = mu_f*V/H; % Characteristic Pressure
+P = mu_f*V/H; % Pressure
 
 % h = (H - epsilon_true) / H;
 h = 1 - epsilon; % [Non-dimensional] radius of lumen to the total radius
-length_factor = 10; % length_factor * vessel radius = length of the vessel
+length_factor = 5; % length_factor * vessel radius = length of the vessel
 
 %% Compute the constants
 
@@ -132,6 +132,6 @@ volume_EGL = V*2*pi*(volume_EGL_0(x_end_EGL) - volume_EGL_0(x_start_EGL) ...
     -(volume_EGL_4(x_end_EGL) - volume_EGL_4(x_start_EGL)));
 
 flow_rate = volume_lumen + volume_EGL;
-resistance = abs(P*A*length_factor)./flow_rate;
+resistance = abs(A*length_factor)./flow_rate;
 
 end

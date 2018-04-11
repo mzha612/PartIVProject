@@ -104,14 +104,14 @@ U = @(D1, D2, A, E, M, x2) -D1*exp(-sqrt(chi)*x2) - D2*exp(sqrt(chi)*x2)...
 
 %% Plots
 
-x2_EGL_neg = linspace(-1,-1+epsilon,201);
-x2_lumen = linspace(-1+epsilon,1-epsilon,2001);
-x2_EGL_pos = linspace(1-epsilon,1,201);
+x2_EGL_neg = linspace(0,epsilon,201);
+x2_lumen = linspace(epsilon,1-epsilon,2001);
+x2_EGL_pos = linspace(0.99-epsilon,0.99,201);
 
 % 1) Reproduce the velocities of the fluid
 figure
 
-% cmap = colormap('parula');
+% cmap = colormap('parula');                
 cmap = colormap('colorcube');
 
 % Fluid phase in negative coordinates

@@ -8,11 +8,11 @@ clc
 
 % Generation is a "continuous range between two levels".
 % Level is a "discrete point"
-P0 = 101325;          % Inital Pressure
+P0 = 150;          % Inital Pressure
 Pinf = 0.5*P0;          % Final Pressure  
-R_0 = 5; % Input vessel radius in micronmetres
+R_0 = 50; % Input vessel radius in micronmetres
 
-num_bif = 3; % number of bifurations to the middle. ie expansion.
+num_bif = 4; % number of bifurations to the middle. ie expansion.
 num_gen = num_bif * 2;  % Number of generations 
 num_levels = num_bif * 2 + 1; % Number of levels
 
@@ -42,8 +42,8 @@ for i = 1:num_gen
         Vessels{k}.Generation = i;
         Vessels{k}.Radius = gen_radii(i);
         Vessels{k}.Area = pi*gen_radii(i)^2;
-%         Vessels{k}.Resistance = K(Vessels{k}.Radius);
-        Vessels{k}.Resistance = CalcResistance(Vessels{k}.Radius*10^(-6)); % Micron -> metres
+        Vessels{k}.Resistance = K(Vessels{k}.Radius);
+%         Vessels{k}.Resistance = CalcResistance(Vessels{k}.Radius*10^(-6)); % Micron -> metres
         
         % On the RHS with respect to the middle
         if (i > num_bif)
@@ -144,8 +144,8 @@ clear a b
 for i = 1:num_vessels    
     AP(i,Vessels{i}.End_Node + 1) = 1;
     AP(i,Vessels{i}.Start_Node + 1) = -1;
-%     AP(i,num_nodes + Vessels{i}.ID) =  K(Vessels{i}.Radius);
-    AP(i,num_nodes + Vessels{i}.ID) =  CalcResistance(Vessels{k}.Radius*10^(-6));
+    AP(i,num_nodes + Vessels{i}.ID) =  K(Vessels{i}.Radius);
+%     AP(i,num_nodes + Vessels{i}.ID) =  CalcResistance(Vessels{k}.Radius*10^(-6));
 end
 
 

@@ -4,15 +4,30 @@
 clear
 close all
 clc
+
+% addpath(genpath(pwd));
 %% Parameters
 
 % Generation is a "continuous range between two levels".
 % Level is a "discrete point"
-P0 = 101325;          % Inital Pressure
-Pinf = 0.5*P0;          % Final Pressure  
-R_0 = 5; % Input vessel radius in micronmetres
 
-num_bif = 3; % number of bifurations to the middle. ie expansion.
+P0_true = 100;          % Inital Pressure (Pascal)
+Pinf_true = 50;          % Final Pressure (Pascal)
+
+R_0 = 5; % Input vessel radius in micronmetres
+R_0_m = 5*10^(-6);
+% Set a characteric pressure value
+mu_f = 10^(-3); % Plasma dynamic viscosity (Pascal second)
+V = 10^(-3); % Flow velocity (metres per second)
+P_ref = mu_f*V/(R_0_m*10^(-6));
+
+% Non-dimensionalise the pressures
+P0 = P0_true / P_ref;
+Pinf = Pinf_true / P_ref;
+
+length_factor = 10;
+
+num_bif = 4; % number of bifurations to the middle. ie expansion.
 num_gen = num_bif * 2;  % Number of generations 
 num_levels = num_bif * 2 + 1; % Number of levels
 
@@ -34,6 +49,7 @@ num_nodes = sum(lvl_nodes); % Number of nodes total.
 
 gen_vessel_ID = getID(gen_vessels,1);
 lvl_node_ID = getID(lvl_nodes,0);
+length_factor = 10;
 
 k = 1;
 for i = 1:num_gen
@@ -43,8 +59,11 @@ for i = 1:num_gen
         Vessels{k}.Radius = gen_radii(i);
         Vessels{k}.Area = pi*gen_radii(i)^2;
 %         Vessels{k}.Resistance = K(Vessels{k}.Radius);
-        Vessels{k}.Resistance = CalcResistance(Vessels{k}.Radius*10^(-6)); % Micron -> metres
-        
+        Vessels{k}.Resistance = ...
+            CalcResistance(Vessels{k}.Radius*10^(-6), R_0*10^(-6), length_factor);
+        % Micron -> metres
+        Vessels{k}.Resistance = ...
+            CalcResistance(Vessels{k}.Radius*10^(-6), R_0*10^(-6), length_factor)*length_factor;
         % On the RHS with respect to the middle
         if (i > num_bif)
             Vessels{k}.Position = 1;
@@ -145,7 +164,7 @@ for i = 1:num_vessels
     AP(i,Vessels{i}.End_Node + 1) = 1;
     AP(i,Vessels{i}.Start_Node + 1) = -1;
 %     AP(i,num_nodes + Vessels{i}.ID) =  K(Vessels{i}.Radius);
-    AP(i,num_nodes + Vessels{i}.ID) =  CalcResistance(Vessels{k}.Radius*10^(-6));
+    AP(i,num_nodes + Vessels{i}.ID) =  Vessels{k}.Resistance;
 end
 
 
@@ -189,7 +208,7 @@ clear i j k;
 theta_init = pi/4;
 theta_end = pi/7;
 theta = linspace(theta_init, theta_end, num_bif-1); % Angle of branching at the bifurcation point
-length_factor = 5; % length_factor * vessel radius = vessel length
+% length_factor = 5; % length_factor * vessel radius = vessel length
 max_linewidth = 10; % Linewidth of the plot representing the maximum vessel
                    % radius in the network
                    
@@ -369,7 +388,7 @@ for i = 1:1:num_nodes
     scatter(ax2, Nodes{i}.x, Nodes{i}.y, node_marker, ...
         'MarkerFacecolor', cmap_P(cmap_i, :), 'MarkerEdgeColor', 'none')
     
-    text(Nodes{i}.x, Nodes{i}.y , sprintf('P_{%i}=%.2f', i-1, u(i)), ...
+    text(Nodes{i}.x, Nodes{i}.y , sprintf('P_{%i}=%.2e', i-1, u(i)), ...
         'HorizontalAlignment', 'center', 'color', [0, 0, 0], ...
         'FontSize' ,node_txt*quant_font_sz, 'VerticalAlignment', 'middle')
 end
@@ -425,7 +444,7 @@ for i = 1:1:num_nodes
     scatter(ax3, Nodes{i}.x, Nodes{i}.y, node_marker, ...
         'MarkerFacecolor', cmap_P(cmap_i, :), 'MarkerEdgeColor', 'none')
     
-    text(Nodes{i}.x, Nodes{i}.y , sprintf('P_{%i}=%.2f', i-1, u(i)), ...
+    text(Nodes{i}.x, Nodes{i}.y , sprintf('P_{%i}=%.2e', i-1, u(i)), ...
         'HorizontalAlignment', 'center', 'color', [0, 0, 0], ...
         'FontSize' ,node_txt*quant_font_sz, 'VerticalAlignment', 'middle')
 end

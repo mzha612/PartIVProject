@@ -1,10 +1,15 @@
-function resistance = CalcResistance(H)
+function [resistance, flow_rate, A] = ...
+    CalcResistance_0(H, H_ref)
 % This function calculates the resistnace for a given vessel radius by
 % dividing the flow rate by the pressure drop
 % Input:
-%   * H = vessel radius in units of meteres (i.e. not scaled)
+%   * H = vessel radius in units of meteres
+%   * H = reference vessel radius from the network in units of meteres
 % Output:
-%   * resistance = flow rate / pressure drop from inlet to outlet
+%   * resistance = non-dimensional flow rate / pressure drop gradient
+% (assumed to be constant)
+%   * flow_rate = non-dimensional flow rate
+%   * A = non-dimensional pressure gradient
 
 %% Parameters
 
@@ -15,19 +20,19 @@ if H <= epsilon_true
         'The vessel radius has to be greater than the thickness of EGL = %.3e m', epsilon_true);
     error(error_txt);
 end
-epsilon = epsilon_true / H; % [Non-dimensional] thickness of EGL layer
+epsilon = epsilon_true / H_ref; % [Non-dimensional] thickness of EGL layer
 K = 9.9e9; % Hydraulic resistivity (Pascal second per metres squared)
 mu_f = 10^(-3); % Plasma dynamic viscosity (Pascal second)
 phi_f = 0.99; % Fluid phase fraction
 phi_s = 1 - phi_f; % Solud fraction
 phi = phi_s/phi_f;
-chi = (K*(H^2))/(phi_f*mu_f); % [Non-dimensional] EGL permeability
+chi = (K*(H^2))/(phi_f*mu_f); % ! [Non-dimensional] Darcy permeability
+% Non-mimesionalised with respect to the radius of the given vessel
 V = 10^(-3); % Flow velocity (metres per second)
-P = mu_f*V/H; % Pressure
+P = mu_f*V/H; % Characteristic Pressure
 
-% h = (H - epsilon_true) / H;
-h = 1 - epsilon; % [Non-dimensional] radius of lumen to the total radius
-length_factor = 5; % length_factor * vessel radius = length of the vessel
+% [Non-dimensional] radius of lumen to the total radius
+h = (H - epsilon_true) / H_ref;
 
 %% Compute the constants
 
@@ -110,14 +115,14 @@ M = M1 + M2 - M3 - 1;
 
 % In the lumen
 x_start_l = 0;
-x_end_l = H - epsilon_true;
+x_end_l = h;
 
-volume_lumen = V*pi*((0.25*A*(x_end_l^4) + (x_end_l^2)) - ...
+volume_lumen = 2*pi*((0.25*A*(x_end_l^4) + (x_end_l^2)) - ...
     (0.25*A*(x_start_l^4) + (x_start_l^2)));
 
 % In the EGL
 x_start_EGL = x_end_l;
-x_end_EGL = H;
+x_end_EGL = H / H_ref;
 
 volume_EGL_0 = @(x) -((sqrt(chi)).^(-1)).*D1*x.*exp(-sqrt(chi)*x);
 volume_EGL_1 = @(x) (chi.^(-1)).*D1.*exp(-sqrt(chi)*x);
@@ -125,13 +130,13 @@ volume_EGL_2 = @(x) ((sqrt(chi)).^(-1)).*D2*x.*exp(sqrt(chi)*x);
 volume_EGL_3 = @(x) (chi.^(-1)).*D2.*exp(sqrt(chi)*x);
 volume_EGL_4 = @(x) (((A+aBcs)./(x*chi)*x));
 
-volume_EGL = V*2*pi*(volume_EGL_0(x_end_EGL) - volume_EGL_0(x_start_EGL) ...
+volume_EGL = 2*pi*(volume_EGL_0(x_end_EGL) - volume_EGL_0(x_start_EGL) ...
     -(volume_EGL_1(x_end_EGL) - volume_EGL_1(x_start_EGL)) ...
     + volume_EGL_2(x_end_EGL) - volume_EGL_2(x_start_EGL) ...
     -(volume_EGL_3(x_end_EGL) - volume_EGL_3(x_start_EGL)) ...
     -(volume_EGL_4(x_end_EGL) - volume_EGL_4(x_start_EGL)));
 
 flow_rate = volume_lumen + volume_EGL;
-resistance = abs(A*length_factor)./flow_rate;
+resistance = abs(A)/flow_rate;
 
 end

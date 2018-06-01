@@ -5,14 +5,14 @@ clear
 close all
 clc
 %% Parameters
-
+tic
 % Generation is a "continuous range between two levels".
 % Level is a "discrete point"
-P0 = 150;          % Inital Pressure
+P0 = 1;          % Inital Pressure
 Pinf = 0.5*P0;          % Final Pressure  
 R_0 = 50; % Input vessel radius in micronmetres
 
-num_bif = 4; % number of bifurations to the middle. ie expansion.
+num_bif = 13; % number of bifurations to the middle. ie expansion.
 num_gen = num_bif * 2;  % Number of generations 
 num_levels = num_bif * 2 + 1; % Number of levels
 
@@ -120,8 +120,8 @@ Nodes{num_nodes}.Daughter_Vessel = [];
 
 %% Formulate Matrix
  
-AQ = zeros(num_nodes - 2, num_vessels);
-AP = zeros(num_vessels, num_nodes + num_vessels);
+AQ = sparse(num_nodes - 2, num_vessels);
+AP = sparse(num_vessels, num_nodes + num_vessels);
 
 % Mass Conservation
 for i = 2:num_nodes - 1
@@ -150,18 +150,23 @@ end
 
 
 % Inital and Final pressure Constraints
-AR = zeros(2, num_nodes + num_vessels);
+AR = sparse(2, num_nodes + num_vessels);
 AR(1,1) = 1;
 AR(2,num_nodes) = 1;
 
-A = [AP; zeros(num_nodes - 2,num_nodes), AQ; AR];
 
+A = [sparse(AP); sparse(num_nodes - 2,num_nodes), sparse(AQ); sparse(AR)];
+A = sparse(A);
 clear AP AQ AR;
 % RHS
-b = [zeros(num_nodes + num_vessels - 2,1); P0; Pinf];
-
+b = [sparse(num_nodes + num_vessels - 2,1); P0; Pinf];
+% spy(full(A))
 % Solve
-u = A\b;
+% u = A\b;
+
+AA = @(x) A*x - b;
+u = fsolve(AA,zeros(size(b)));
+% u = bicg(A,b,1e-12,10000);
 
 %% Assign Flow and Pressure values
 for i = 1:num_nodes
@@ -173,5 +178,7 @@ for i = 1:num_vessels
 end
 
 clear i j k;
-
-Visualise(Nodes,Vessels,num_bif,R_0,u)
+toc
+% tic
+% Visualise(Nodes,Vessels,num_bif,R_0,u)
+% toc

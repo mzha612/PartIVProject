@@ -1,0 +1,6 @@
+V2
+
+Based on v1 
+rewritten/edited mostly by Julie
+
+Put into v2 such that Michael can take over, and do most of it. Much easier when one person codes.

@@ -1,0 +1,6 @@
+V3
+
+Based on v1,2 
+rewritten by Michael 3-06-18
+
+For the purpose of generalising some of the code for different networks and to build upon the binary network model.s

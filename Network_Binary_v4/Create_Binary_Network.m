@@ -25,7 +25,7 @@ Date created = 09-06-18
 % Level is a "discrete point"
 
 global num_vessels num_nodes
-art2ven = 1;                        % Length ratio - venuoles hold 4 times more blood than artrioles./viens/artiers
+art2ven = 2;                        % Length ratio - venuoles hold 4 times more blood than artrioles./viens/artiers
 num_gen = num_bif * 2;              % Number of generations
 
 gen_vessels = Bifurcate(num_bif);    % Array, Number of vessels in each generation
@@ -38,10 +38,10 @@ lvl_node_ID = getIDnode(lvl_nodes,0);
 
 % ID for each node in each level
 lvl_node_ID{1} = 1;
-lvl_node_ID{end} = num_nodes;
+
 gen_vessel_ID = [0, gen_vessel_ID, 0];
 num_nodes = sum(lvl_nodes);
-
+lvl_node_ID{end} = num_nodes;
 % Creates the radii for each generation
 gen_radii = zeros(1,num_gen);
 gen_radii(1) = d_R_0; %% TODO more effecient.

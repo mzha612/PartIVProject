@@ -42,8 +42,8 @@ end
 Resistance = zeros(num_vessels,1);
 for v = 1:num_vessels
     Vessel{v}.h = 1 - (epsilon)/Vessel{v}.Radius;
-%     Vessel{v}.n_Resistivity = PoiseuilleFlow(Vessel{v}.n_Radius);
-    Vessel{v}.n_Resistivity = Resistance_Summets(Vessel{v}.h); % TODO if using different resistance maybe use a function handle
+    Vessel{v}.n_Resistivity = PoiseuilleFlow(Vessel{v}.n_Radius);
+%     Vessel{v}.n_Resistivity = Resistance_Summets(Vessel{v}.h); % TODO if using different resistance maybe use a function handle
     Resistance(v) = Vessel{v}.n_Resistivity * Vessel{v}.n_Length;
     Vessel{v}.n_Resistance = Resistance(v);
     Vessel{v}.n_Conductance = 1/Resistance(v);

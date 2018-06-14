@@ -1,6 +1,5 @@
 function [A,aBcs,D1,D2,E,M] = Calculate_Constants(chi,h,phi_f)
 %% Compute the constants v4
-
 %{
 Calculates the constant values from the Appendix A in \autocite{summets_2018}.
 For Zero-order flow for the straight walled vessel

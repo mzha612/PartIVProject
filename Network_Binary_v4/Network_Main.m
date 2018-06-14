@@ -47,7 +47,6 @@ for i = 1:num_vessels
     %     Vessels{i}.Radius =  Vessels{i}.n_Radius * d_R;
     %     Vessels{i}.Length = Vessels{i}.n_Length * Vessels{i}.Radius;
     %     Vessels{i}.Resistance = %TODO redimensionalise
-    Vessel{i}.Flow = Vessel{i}.n_Flow * Vessel{i}.Radius;
     Vessel{i}.Pressure_In = Vessel{i}.n_Pressure_In * d_P_0;
     Vessel{i}.Pressure_Out = Vessel{i}.n_Pressure_Out * d_P_0;
 end

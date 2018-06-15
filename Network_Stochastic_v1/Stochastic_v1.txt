@@ -1,0 +1,13 @@
+Stochastic v1
+
+Michael Zhang
+
+11-06-18
+
+Attempt at making a stochastic network from statsitcal distributions.
+
+Coded up a Random segment branching algorithm and a random terminal branching algorithm.
+
+coded up results script too,
+
+Currrenlty no "Spatial" or "statistical" 

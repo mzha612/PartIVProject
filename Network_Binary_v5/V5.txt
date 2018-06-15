@@ -1,0 +1,14 @@
+Michael Zhang 15-06-18
+
+Based on v4,
+
+In this version:
+
+TODO:
+REsistance calculations checked.
+Poiseuille flow checked,
+
+Resistance, units obtained
+Obtain a base resistance
+
+Generate statistics for the real rate mesentery data obtained.

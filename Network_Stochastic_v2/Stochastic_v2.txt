@@ -1,0 +1,11 @@
+Stochastic v2
+
+Michael Zhang
+
+16-06-18
+
+TODO:
+Distributions Possibly in r
+Sample from distribution into lengths, radii.
+Create script to "Combine" RSB and RTB networks
+Base case - poseuille flow.

@@ -3,6 +3,8 @@ Michael Zhang 15-06-18
 Based on v4,
 
 In this version:
+Resistance values
+Poiseuille flow comparison
 
 TODO:
 REsistance calculations checked.

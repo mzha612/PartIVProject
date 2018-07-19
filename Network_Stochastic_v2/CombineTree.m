@@ -35,7 +35,7 @@ Total_Vessels = numel(Vessel1);
 num_gen1 = num_generations;
 
 % Create right tree
-[Vessel2,Node2] = Algorithm2(Vessel,Node,"Venuole");
+[Vessel2,Node2] = Algorithm2(Vessel,Node,"Venule");
 Total_Nodes = Total_Nodes + numel(Node2);
 Total_Vessels =Total_Vessels + numel(Vessel2);
 num_gen2 = num_generations;
@@ -77,9 +77,10 @@ for n = 1:numel(Node2)
 end
 
 % Randomly swap terminal end list, such that random connections can be made
-terminal_node1 = terminal_node1(randperm(num_capillaries));
-terminal_node2 = terminal_node2(randperm(num_capillaries));
-
+if ~(isequal(tree1,@SSB) && isequal(tree2,@SSB))
+    terminal_node1 = terminal_node1(randperm(num_capillaries));
+    terminal_node2 = terminal_node2(randperm(num_capillaries));
+end
 %% Middle connections
 
 Vessel3 = cell(1,1);
@@ -119,16 +120,27 @@ for c = 1:num_capillaries
 end
 
 % Assign random vessel radius
+Length_data = load('Frequency_Length.mat');
+Diameter_Data = load('Frequency_Diameter.mat');
 for c = 1:num_capillaries
     Vessel3{c}.Radius = inf;
     % Make sure the random radius is smaller than both parent and daughter.
-    while ~(Vessel3{c}.Radius < Vessel1{Vessel3{c}.Parent_Vessel}.Radius )...
-            && ~(Vessel3{c}.Radius < Vessel2{Vessel3{c}.Daughter_Vessel - numel(Vessel1)}.Radius)
-        Vessel3{c}.Radius = Sample_Diameter("Capillary")/2;
+%     while ~(Vessel3{c}.Radius < Vessel1{Vessel3{c}.Parent_Vessel}.Radius )...
+%             && ~(Vessel3{c}.Radius < Vessel2{Vessel3{c}.Daughter_Vessel - numel(Vessel1)}.Radius)
+%         Vessel3{c}.Radius = Sample_Diameter("Capillary",Diameter_Data)/2;
+%     end
+     while ~(Vessel3{c}.Radius < Vessel1{Vessel3{c}.Parent_Vessel}.Radius + 1e-6 )...
+            && ~(Vessel3{c}.Radius < Vessel2{Vessel3{c}.Daughter_Vessel - numel(Vessel1)}.Radius+ 1e-6)
+        Vessel3{c}.Radius = Sample_Diameter("Capillary",Diameter_Data)/2;
     end
     % aSsign random length from sample distribution
-    Vessel3{c}.Length = Sample_Length("Capillary");
+    Vessel3{c}.Length = Sample_Length("Capillary",Length_data);
     Vessel3{c}.n_Length = Vessel3{c}.Length/Vessel3{c}.Radius;
+    
+    Vessel3{c}.Type = "Capillary";
+    Vessel3{c}.Arterial_Generation = Vessel1{Vessel3{c}.Parent_Vessel}.Generation + 1;
+    
+    Vessel3{c}.Venous_Generation = Vessel2{Vessel3{c}.Daughter_Vessel - numel(Vessel1)}.Venous_Generation + 1;
 end
 
 %% ReAssign infomation.
@@ -159,6 +171,7 @@ Vessel = [Vessel1, Vessel2, Vessel3];
 
 num_nodes = numel(Node);
 num_vessels = numel(Vessel);
+num_generations = num_gen1 + num_gen2 + 1;
 end
 
 

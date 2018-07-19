@@ -1,13 +1,18 @@
 function Resistivity = PoiseuilleFlow(Radius)
-%% PoiseuelleFlow v4
+%% PoiseuelleFlow v5
 %{
-Calculates the poiseulle flow resistance for a straight walled tube%}
+Calculates the poiseuille flow resistance for a straight walled tube
+Derived from Q = Gh3/12mu - wikipedia flow between two infinite parallel
+plates.
+h = diameter,
+G = dp/dx
 %}
+
 %{
 Inputs:
-   Radius 
+    Radius, m
 Outputs:
-   	Resistivity     Non-dimensional resisitivity (resistance per length)
+   	Resistivity  dimensional resisitivity (resistance per length) % Pa.s.m^-3
 %}
 
 %{
@@ -15,11 +20,7 @@ Author = Michael Zhang
 Date created = 10-06-18
 %}
 
-%% Parameters
-
-% TODO: Be non dimensionalised as well
-mu = 1;
-
-Resistivity = 8*mu/pi/Radius^4;
+mu = 1e-3;
+Resistivity = 3/2*mu/Radius^3; 
 
 end

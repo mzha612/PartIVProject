@@ -19,7 +19,7 @@ global num_vessels num_nodes num_generations num_capillaries
 num_vessels = 29;
 num_nodes = 30;
 num_generations = 10;
-num_capillaries = 3;
+num_capillaries = 4;
 Vessel = cell(1,1);
 Node = cell(1,1);
 
@@ -57,7 +57,7 @@ elseif model == 3
     %% Random segment branching
     [Vessel, Node] = RSB(Vessel,Node);
 elseif model == 4
-      [Vessel, Node] = CombineTree(@RTB,@RSB);
+      [Vessel, Node] = CombineTree(@SSB,@SSB);
     for n = 1:num_nodes
     disp(Node{n})
 end

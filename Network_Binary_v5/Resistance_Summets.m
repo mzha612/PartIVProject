@@ -1,5 +1,5 @@
-function [Resistivity] = Resistance_Summets(h)
-%% Resistance_Summets v4
+function [Resistivity] = Resistance_Summets(h,chi)
+%% Resistance_Summets v5
 %{
 Calculates the Resistance from appendix A in summets2018.
 Does this by finding the values of the constants, then using the constants
@@ -10,9 +10,10 @@ pressure gradient A with the flow rate.
 
 %{
 Inputs:
-    h = 1 - epsilon(normalised)
+    h = 1 - epsilon(normalised) 
+    chi = dimensionless parameter.
 Outputs:
-   	Resistivity     Non-dimensional resisitivity (resistance per length)
+   	Resistivity, Non-dimensional resisitivity (resistance per length)
 %}
 
 %{
@@ -20,22 +21,32 @@ Author = Michael Zhang
 Date created = 09-06-18
 %}
 %% Parameters
-% if chi is to change, then this would be better suited as an input or
-chi = 250;
-
-% similar to chi
 phi_f = 0.99; % Fluid phase fraction
 
 %% Constants
 % E, M are to do with elastic displacement of the wall, which we are
 % ignoring
-% [A,aBcs,D1,D2,E,M] = Calculate_Constants(chi,h,phi_f)
 [A,aBcs,D1,D2,~,~] = Calculate_Constants(chi,h,phi_f);
 
 %% Flow Velocity
+% v_f = @(x) (D1*exp(-sqrt(chi).*x)+D2*exp(sqrt(chi).*x)-(A+aBcs)/chi);
+% v_l = @(x) ((A*x.^2)/2 + 1);
 
-v_f = @(x) (D1*exp(-sqrt(chi).*x)+D2*exp(sqrt(chi).*x)-(A+aBcs)/chi).^2;
-v_l = @(x) ((A*x.^2)/2 + 1).^2;
+%% Flow Rate
+% Flowrate as the integral for the 1D graph.
+
+int_v_l = A*h^3/6+h;
+int_v_f = (-D1/sqrt(chi)*exp(-sqrt(chi))+D2/sqrt(chi)*exp(sqrt(chi))-(A+aBcs)/chi)...
+    - (-D1/sqrt(chi)*exp(-sqrt(chi).*h)+D2/sqrt(chi)*exp(sqrt(chi).*h)-(A+aBcs)*h/chi);
+
+Flowrate = 2*(int_v_f + int_v_l);
+% Flowrate = 2*(integral(v_f,h,1) + integral(v_l,0,h));
+
+%% Calculate resistance
+% Division of the pressure gradient A, with the flow rate
+Resistivity = -A/Flowrate;
+
+end
 
 % u = @(x) -D1*exp(-sqrt(chi).*x)-D2*exp(sqrt(chi).*x) + (A*(phi+1)*x.^2)/2 + 1 + E*x+M;
 
@@ -53,15 +64,3 @@ v_l = @(x) ((A*x.^2)/2 + 1).^2;
 %     xlabel('r')
 %     ylabel('v')
 % end
-
-%% Flow Rate
-% Flowrate as the integral for the 1D graph.
-Flowrate = integral(v_f,h,1) + integral(v_l,0,h);
-
-
-%% Calculate resistance
-% Division of the pressure gradient A, with the flow rate
-Resistivity = -A/Flowrate;
-
-end
-

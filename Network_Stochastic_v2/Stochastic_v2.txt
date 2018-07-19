@@ -4,8 +4,10 @@ Michael Zhang
 
 16-06-18
 
-TODO:
-Distributions Possibly in r
-Sample from distribution into lengths, radii.
-Create script to "Combine" RSB and RTB networks
-Base case - poseuille flow.
+Samples pmf - uniform
+Combines trees
+includes SSB - binary tree
+Some network results for various combinations
+Some comparison of fits
+Includes poiseuille comparison
+

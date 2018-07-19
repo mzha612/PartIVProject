@@ -62,6 +62,7 @@ while (c < num_capillaries)
             seed(num_seed) = n; % Save the node number,
         end
     end
+%     TODO: have an updating list rather than make it every single time
     % Randomly choose a seed from the list
     sprout = seed(randi([1,num_seed],1));
     
@@ -105,13 +106,13 @@ end
 
 %%
 
-
+Diameter_Data = load('Frequency_Diameter.mat');
 for v = 1:num_vessels
     % Finds the number of generations of each vessel
     Gen(v) =  Vessel{v}.Generation;
     
     % Samples radii from distribution
-    Vessel{v}.Radius = Sample_Diameter(Vessel_Type)/2;
+    Vessel{v}.Radius = Sample_Diameter(Vessel_Type,Diameter_Data)/2;
 end
 num_generations = max(Gen);
 
@@ -119,7 +120,7 @@ count = 0;
 while count < num_vessels-1
     count = 0;
     for v = 2:num_vessels
-        if Vessel{v}.Radius >= Vessel{Vessel{v}.Parent_Vessel}.Radius
+        if Vessel{v}.Radius >= Vessel{Vessel{v}.Parent_Vessel}.Radius + 1e-6
             temp = Vessel{v}.Radius;
             Vessel{v}.Radius = Vessel{Vessel{v}.Parent_Vessel}.Radius;
             Vessel{Vessel{v}.Parent_Vessel}.Radius = temp;
@@ -128,9 +129,9 @@ while count < num_vessels-1
         end
     end
 end
-
+Length_Data = load('Frequency_Length.mat');
 for v = 1:num_vessels
-    Vessel{v}.Length = Sample_Length(Vessel_Type);
+    Vessel{v}.Length = Sample_Length(Vessel_Type, Length_Data);
     Vessel{v}.n_Length = Vessel{v}.Length/Vessel{v}.Radius;
 end
 % Number of vessels in each generation
@@ -160,6 +161,23 @@ for v = 1:num_vessels
     Vessel{v}.xy_End = Node{Vessel{v}.Daughter_Node}.xy;
     Vessel{v}.xy_Length = norm([Vessel{v}.xy_End,Vessel{v}.xy_Start]);
 end
+
+if Vessel_Type == "Arteriole"
+    for v = 1:num_vessels
+        Vessel{v}.Arterial_Generation = Vessel{v}.Generation;
+        Vessel{v}.Venule_Generation = [];
+        Vessel{v}.Type = "Arteriole";
+    end
+elseif Vessel_Type == "Venule"
+    for v = 1:num_vessels
+        Vessel{v}.Arterial_Generation = [];
+        Vessel{v}.Venous_Generation = Vessel{v}.Generation;
+        Vessel{v}.Type = "Venule";
+    end
+else
+    disp('error, vesseltype')
+end
+
 
 
 % for n = 1:num_nodes

@@ -1,14 +1,14 @@
-function [Vessel, Node] = Create_Binary_Network(num_bif,d_R_0)
-%% Create_Binary_Network v5
+function [Vessel, Node] = Create_Binary_Network_Stochastic(num_bif,d_R_0)
+%% Create_Binary_Network_Stochastic v5
 %{
 Function Creates the vessel segment infomation to be able to form a binary
-tree network.
+tree network. using the length/raidus distributions for rat mesentery.
 %}
 
 %{
 Inputs:
     num_bif % number of bifurations to the middle. ie expansion.
-    d_R_0   % input vessel radius in micronmetres
+    
 Outputs:
     Vessel: Structure, vessel segment infomation
     Node: Structure, nodal infomation
@@ -16,7 +16,7 @@ Outputs:
 
 %{
 Author = Michael Zhang
-Date created = 09-06-18
+Date created = 08-07-18
 %}
 
 %% Parameters

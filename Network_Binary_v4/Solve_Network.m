@@ -110,7 +110,6 @@ for v = 1:num_vessels
     Vessel{v}.n_Pressure_Out = Node{Vessel{v}.Daughter_Node}.n_Pressure;
     Vessel{v}.n_Flow = (Vessel{v}.n_Pressure_In - Vessel{v}.n_Pressure_Out) * Vessel{v}.n_Conductance;
     Vessel{v}.Flow = Vessel{v}.n_Flow * Vessel{v}.Radius;
-
 end
 
 end

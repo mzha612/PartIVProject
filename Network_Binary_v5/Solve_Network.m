@@ -1,5 +1,5 @@
-function [Vessel,Node] = Solve_Network(Vessel,Node,BC_in,BC_out)
-%% Solve_Network v4
+function [Vessel,Node] = Solve_Network(Vessel,Node,BC_in,BC_out,R_type)
+%% Solve_Network v5
 %{
 Function that uses the vessels and nodal infomation to solve a system of
 linear equations.
@@ -23,6 +23,7 @@ Date created = 09-06-18
 %% Parameters
 
 global epsilon num_vessels num_nodes
+global d_P_0
 
 %% Matrix Skeleton
 
@@ -38,15 +39,26 @@ for i = 1:num_nodes
 end
 
 %% Resistance/Conductance
+phi_f = 0.99; % Fluid phase fraction
+mu_f = 10^-3; % viscosity of water, Pa.s
+K = 10^10;
 
-Resistance = zeros(num_vessels,1);
 for v = 1:num_vessels
     Vessel{v}.h = 1 - (epsilon)/Vessel{v}.Radius;
-%     Vessel{v}.n_Resistivity = PoiseuilleFlow(Vessel{v}.n_Radius);
-    Vessel{v}.n_Resistivity = Resistance_Summets(Vessel{v}.h); % TODO if using different resistance maybe use a function handle
-    Resistance(v) = Vessel{v}.n_Resistivity * Vessel{v}.n_Length;
-    Vessel{v}.n_Resistance = Resistance(v);
-    Vessel{v}.n_Conductance = 1/Resistance(v);
+    chi = K*(Vessel{v}.Radius)^2/(phi_f * mu_f);
+    Vessel{v}.Resistance =  Vessel{v}.n_Length  / Vessel{v}.Radius.^2 * mu_f *Resistance_Summets(Vessel{v}.h,chi); % Pa.s.m-3.m
+    
+    Vessel{v}.Resistance_Poiseuille = Vessel{v}.Length*PoiseuilleFlow(Vessel{v}.Radius);
+    Vessel{v}.Resistance_Poiseuille_effective = Vessel{v}.Length*PoiseuilleFlow(Vessel{v}.Radius-epsilon);
+    if (R_type == 0)
+        Vessel{v}.Conductance = 1/Vessel{v}.Resistance;
+    elseif (R_type == 1)
+        Vessel{v}.Conductance = 1/Vessel{v}.Resistance_Poiseuille;
+    elseif (R_type == 2)
+        Vessel{v}.Conductance = 1/Vessel{v}.Resistance_Poiseuille_effective;
+    else
+        disp('error in R_type')
+    end
 end
 
 %% Build Matrix
@@ -71,8 +83,8 @@ for i = 1:num_nodes
                     end
                 end
                 
-                A(i,j) = -Vessel{Node{j}.Daughter_Vessel(index)}.n_Conductance;
-                A(i,i) = A(i,i) + Vessel{Node{j}.Daughter_Vessel(index)}.n_Conductance;
+                A(i,j) = -Vessel{Node{j}.Daughter_Vessel(index)}.Conductance;
+                A(i,i) = A(i,i) + Vessel{Node{j}.Daughter_Vessel(index)}.Conductance;
             elseif Connectivity(i,j) == -1
                 % for the mass conservation at node i with daugher node j,
                 % assign appropriate values to the matrix
@@ -86,8 +98,8 @@ for i = 1:num_nodes
                     end
                 end
                 
-                A(i,j) = -Vessel{Node{j}.Parent_Vessel(index)}.n_Conductance;
-                A(i,i) = A(i,i) + Vessel{Node{j}.Parent_Vessel(index)}.n_Conductance;
+                A(i,j) = -Vessel{Node{j}.Parent_Vessel(index)}.Conductance;
+                A(i,i) = A(i,i) + Vessel{Node{j}.Parent_Vessel(index)}.Conductance;
             end
         end
     end
@@ -97,9 +109,9 @@ end
 
 P = A\b;
 % TODO maybe a different solvr is necessary for bigger networks, currently
-% okey dokey.
+% okie dokie.
 
-%% Assign Flow and Pressure values
+%% Assign Pressure values
 
 for n = 1:num_nodes
     Node{n}.n_Pressure = P(n);
@@ -108,9 +120,16 @@ end
 for v = 1:num_vessels
     Vessel{v}.n_Pressure_In = Node{Vessel{v}.Parent_Node}.n_Pressure;
     Vessel{v}.n_Pressure_Out = Node{Vessel{v}.Daughter_Node}.n_Pressure;
-    Vessel{v}.n_Flow = (Vessel{v}.n_Pressure_In - Vessel{v}.n_Pressure_Out) * Vessel{v}.n_Conductance;
-    Vessel{v}.Flow = Vessel{v}.n_Flow * Vessel{v}.Radius;
+end
 
+%% Redimensionalise
+for v = 1:num_vessels
+    Vessel{v}.Pressure_In = Vessel{v}.n_Pressure_In * d_P_0;
+    Vessel{v}.Pressure_Out = Vessel{v}.n_Pressure_Out * d_P_0;
+    Vessel{v}.Flow = (Vessel{v}.Pressure_In - Vessel{v}.Pressure_Out) * Vessel{v}.Conductance;
+%     if Vessel{v}.Flow < 0
+%         disp(Vessel{v});
+%     end
 end
 
 end

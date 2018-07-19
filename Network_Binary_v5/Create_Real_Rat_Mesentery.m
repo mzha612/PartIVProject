@@ -1,5 +1,5 @@
 function [Vessel,Node] = Create_Real_Rat_Mesentery()
-%% Create_Binary_Network v4
+%% Create_Binary_Network v5
 %{
 Function Creates the vessel segment infomation to be able to solve the rat mesentery
 data obtained from secomb. 1990 - 913 vessels.
@@ -58,8 +58,8 @@ for v = 1:num_vessels
     Vessel{v}.Name = vessel_name_pool(v);
     Vessel{v}.Parent_Node = find(node_name_pool==NodeIn(v));
     Vessel{v}.Daughter_Node = find(node_name_pool==NodeOut(v));
-    Vessel{v}.Radius = Diameter(v) / 2;
-    Vessel{v}.Length = Length(v);
+    Vessel{v}.Radius = Diameter(v) / 2 * 10^-6;
+    Vessel{v}.Length = Length(v)* 10^-6;
     Vessel{v}.n_Radius = 1;
     Vessel{v}.n_Length = Vessel{v}.Length / Vessel{v}.Radius;
 end
@@ -116,5 +116,28 @@ for b = 1:num_boundary
         end
     end
 end
+
+% Identifying Arterioles/Venules/Capillaries
+% Probably doesn't work as good as it should.
+for v=1:num_vessels
+    if isempty(Vessel{v}.Parent_Vessel)
+        Vessel{v}.Type = "Arteriole";
+        continue;
+    elseif isempty(Vessel{v}.Daughter_Vessel) 
+        Vessel{v}.Type = "Venuole";
+        continue;
+    end
+    
+    if (size(Vessel{v}.Parent_Vessel,2) == 2) && (size(Vessel{v}.Daughter_Vessel,2) == 1)
+        Vessel{v}.Type = "Venule";
+    elseif (size(Vessel{v}.Parent_Vessel,2) == 1) && (size(Vessel{v}.Daughter_Vessel,2) == 2)
+        Vessel{v}.Type = "Arteriole";
+    elseif (size(Vessel{v}.Parent_Vessel,2) == 1) && (size(Vessel{v}.Daughter_Vessel,2) == 1)
+        Vessel{v}.Type = "Capillary";
+    else
+        disp("double vessel")
+    end
+end
+
 
 end
